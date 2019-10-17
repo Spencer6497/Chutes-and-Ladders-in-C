@@ -1,7 +1,7 @@
 /*
  * This program implements a variation of the game Chutes and Ladders. In this game, two players will repeatedly roll
  * a six-sided die to move their piece forward. If they land on a chute, they move backwards, and if they land on a
- * ladder, they move forwards. When a space is landed on, it is removed. Occasionally, a player will land on a space
+ * ladder, they move forwards. When a chute, ladder, or haven is landed on, it is removed. Occasionally, a player will land on a space
  * that will direct them to the nearest haven, either backwards or forwards. Logic to handle collisions is included as
  * well.
  *
@@ -103,55 +103,58 @@ char * move(char *p1, char *p2, int playerNum, char board[], int size) {
     p1 = p1 + roll; // Move player according to dice roll
     // Print one line of output followed by a newline
     printf("Player %d rolled %d and moved to square %d", playerNum, roll, p1 - board);
-    // If player lands on a space, a -, a *, or an H naturally, do not move player
-    if (*p1 == ' ' || *p1 == 'H' || *p1 == '-' || *p1 == '*') {
-        // Test for collisions
-        if ((p1 - board) > 0 && p1 == p2) {
-            p1 = p1 - 1;
-            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+    // Check that the player pointer is within bounds
+    if (p1 < board + size) {
+        // If player lands on a space, a -, a *, or an H naturally, do not move player
+        if (*p1 == ' ' || *p1 == 'H' || *p1 == '-' || *p1 == '*') {
+            // Test for collisions
+            if ((p1 - board) > 0 && p1 == p2) {
+                p1 = p1 - 1;
+                printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+            }
+            printf("\n");
+            return p1;
+            // If the player lands on a chute
+        } else if (*p1 >= 'a' && *p1 <= 'm') {
+            p1 = chuteLadder(p1, board);
+            printf(" which is a chute and is moving back to square %d\n", p1 - board);
+            // Test for collisions
+            if ((p1 - board) > 0 && p1 == p2) {
+                p1 = p1 - 1;
+                printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+            }
+            return p1;
+            // if the player lands on a ladder
+        } else if (*p1 >= 'o' && *p1 <= 'z') {
+            p1 = chuteLadder(p1, board);
+            printf(" which is a ladder and is moving forward to square %d\n", p1 - board);
+            // Test for collisions
+            if ((p1 - board) > 0 && p1 == p2) {
+                p1 = p1 - 1;
+                printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+            }
+            return p1;
+            // If a player lands on a forwards haven
+        } else if (*p1 == 'F') {
+            p1 = findHaven(p1, board);
+            printf(" which is a 'F' so is moving forward and lands at %d\n", p1 - board);
+            // Test for collisions
+            if ((p1 - board) > 0 && p1 == p2) {
+                p1 = p1 - 1;
+                printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+            }
+            return p1;
+            // If the player lands on a backwards haven
+        } else if (*p1 == 'B') {
+            p1 = findHaven(p1, board);
+            printf(" which is a 'B' so is moving back and lands at %d\n", p1 - board);
+            // Test for collisions
+            if ((p1 - board) > 0 && p1 == p2) {
+                p1 = p1 - 1;
+                printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+            }
+            return p1;
         }
-        printf("\n");
-        return p1;
-    // If the player lands on a chute
-    } else if (*p1 >= 'a' && *p1 <= 'm') {
-        p1 = chuteLadder(p1, board);
-        printf(" which is a chute and is moving back to square %d\n", p1 - board);
-        // Test for collisions
-        if ((p1 - board) > 0 && p1 == p2) {
-            p1 = p1 - 1;
-            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
-        }
-        return p1;
-    // if the player lands on a ladder
-    } else if (*p1 >= 'o' && *p1 <= 'z') {
-        p1 = chuteLadder(p1, board);
-        printf(" which is a ladder and is moving forward to square %d\n", p1 - board);
-        // Test for collisions
-        if ((p1 - board) > 0 && p1 == p2) {
-            p1 = p1 - 1;
-            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
-        }
-        return p1;
-    // If a player lands on a forwards haven
-    } else if (*p1 == 'F') {
-        p1 = findHaven(p1, board);
-        printf(" which is a 'F' so is moving forward and lands at %d\n", p1 - board);
-        // Test for collisions
-        if ((p1 - board) > 0 && p1 == p2) {
-            p1 = p1 - 1;
-            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
-        }
-        return p1;
-    // If the player lands on a backwards haven
-    } else if (*p1 == 'B') {
-        p1 = findHaven(p1, board);
-        printf(" which is a 'B' so is moving back and lands at %d\n", p1 - board);
-        // Test for collisions
-        if ((p1 - board) > 0 && p1 == p2) {
-            p1 = p1 - 1;
-            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
-        }
-        return p1;
     }
     // Print a newline and return the player pointer as a base case
     printf("\n");
@@ -175,16 +178,27 @@ void main() {
     FILE *fp1;
     fp1 = fopen("output.txt", "w");
 
-    // Test move and output functions
+    /* Test move and output functions
     for (int i = 0; i < 10; i++) {
         printf("Turn %d: ", i + 1);
         p1 = move(p1, p2, 1, board, SIZE);
         //output(board, p1, p2, fp1);
         p2 = move(p2, p1, 2, board, SIZE);
         output(board, p1, p2, fp1);
-    }
-
+    } */
 
     // Begin main game loop
+    while (p1 < board + SIZE && p2 < board + SIZE) {
+        p1 = move(p1, p2, 1, board, SIZE);
+        p2 = move(p2, p1, 2, board, SIZE);
+        output(board, p1, p2, fp1);
+    }
+
+    // Determine winner
+    if (p1 > p2) {
+        printf("Player 1 wins the game!");
+    } else {
+        printf("Player 2 wins the game!");
+    }
 
 }
