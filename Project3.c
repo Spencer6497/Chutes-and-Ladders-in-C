@@ -201,4 +201,6 @@ void main() {
         printf("Player 2 wins the game!");
     }
 
+    // Close file pointer
+    fclose(fp1);
 }
