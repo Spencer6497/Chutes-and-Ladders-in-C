@@ -15,9 +15,9 @@
 /* Function Prototypes
  *
  *void output(char[], char *, char *, FILE *);
- *char * findHaven(char, char *, char[]);
- *char * chuteLadder();
- *char * move(char *, char *, char[] *, int, int);
+ *char * findHaven(char *, char[]);
+ *char * chuteLadder(char *, char[]);
+ *char * move(char *, char *, int, char[], int);
  *
 */
 
@@ -49,13 +49,15 @@ void output(char board[], char *p1, char *p2, FILE *fp1) {
         // Move the current position along
         a++;
     }
+    // output new line
+    putc('\n', fp1);
 }
 
 // Define function to find the nearest haven, given the direction either forwards or backwards
-char * findHaven(char direction, char *player, char board[]) {
+char * findHaven(char *player, char board[]) {
     char *haven; // Create pointer variable to locate the nearest haven
     // if the player must search backwards for a haven
-    if (direction == 'B') {
+    if (*player == 'B') {
         // Iterate down from the player's position to the board[0]
         for (haven = player; haven >= board; haven--) {
             // If there are no more havens backwards, return the starting position
@@ -69,7 +71,7 @@ char * findHaven(char direction, char *player, char board[]) {
             }
         }
     // if the player must search forwards for a haven
-    } else if (direction == 'F') {
+    } else if (*player == 'F') {
         // Iterate up from the players position to board + SIZE
         for (haven = player; haven <= board + SIZE; haven++) {
             // If there are no more havens forwards, do not move the player
@@ -86,13 +88,74 @@ char * findHaven(char direction, char *player, char board[]) {
 }
 
 // Define chuteLadder function to move players if they land on a chute or a ladder
-char * chuteLadder() {
-
+char * chuteLadder(char *player, char board[]) {
+    // Calculate distance forwards or backwards
+    int distance = (int) (*player - 'n');
+    // Change chute or ladder to -
+    *player = '-';
+    player = player + distance;
+    return player;
 }
 
 // Define move function to move players, return pointer
-char * move(char *p1, char *p2, int playerNum, char *board[], int size) {
-
+char * move(char *p1, char *p2, int playerNum, char board[], int size) {
+    int roll = rand() % 6 + 1; // Determine roll of dice via rand function
+    p1 = p1 + roll; // Move player according to dice roll
+    // Print one line of output followed by a newline
+    printf("Player %d rolled %d and moved to square %d", playerNum, roll, p1 - board);
+    // If player lands on a space, a -, a *, or an H naturally, do not move player
+    if (*p1 == ' ' || *p1 == 'H' || *p1 == '-' || *p1 == '*') {
+        // Test for collisions
+        if (p1 == p2) {
+            p1 = p1 - 1;
+            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+        }
+        printf("\n");
+        return p1;
+    // If the player lands on a chute
+    } else if (*p1 >= 'a' && *p1 <= 'm') {
+        p1 = chuteLadder(p1, board);
+        printf(" which is a chute and is moving back to square %d\n", p1 - board);
+        // Test for collisions
+        if (p1 == p2) {
+            p1 = p1 - 1;
+            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+        }
+        return p1;
+    // if the player lands on a ladder
+    } else if (*p1 >= 'o' && *p1 <= 'z') {
+        p1 = chuteLadder(p1, board);
+        printf(" which is a ladder and is moving forward to square %d\n", p1 - board);
+        // Test for collisions
+        if (p1 == p2) {
+            p1 = p1 - 1;
+            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+        }
+        return p1;
+    // If a player lands on a forwards haven
+    } else if (*p1 == 'F') {
+        p1 = findHaven(p1, board);
+        printf(" which is a 'F' so is moving forward and lands at %d\n", p1 - board);
+        // Test for collisions
+        if (p1 == p2) {
+            p1 = p1 - 1;
+            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+        }
+        return p1;
+    // If the player lands on a backwards haven
+    } else if (*p1 == 'B') {
+        p1 = findHaven(p1, board);
+        printf(" which is a 'B' so is moving back and lands at %d\n", p1 - board);
+        // Test for collisions
+        if (p1 == p2) {
+            p1 = p1 - 1;
+            printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
+        }
+        return p1;
+    }
+    // Print a newline and return the player pointer as a base case
+    printf("\n");
+    return p1;
 }
 
 // Main function, responsible for initializing players, board, and looping until a player wins, also outputs result
@@ -104,14 +167,23 @@ void main() {
     srand(time(NULL));
 
     // Initialize both player pointers to the beginning of the array
-    char *p1 = board, *p2 = board;
+    char *p1, *p2;
+    p1 = board;
+    p2 = board;
 
     // Initialize file pointer for the output textfile
     FILE *fp1;
     fp1 = fopen("output.txt", "w");
 
-    // Test
-    //output(board, p1, p2, fp1);
+    // Test move and output functions
+    for (int i = 0; i < 10; i++) {
+        printf("Turn %d: ", i + 1);
+        p1 = move(p1, p2, 1, board, SIZE);
+        //output(board, p1, p2, fp1);
+        p2 = move(p2, p1, 2, board, SIZE);
+        output(board, p1, p2, fp1);
+    }
+
 
     // Begin main game loop
 
