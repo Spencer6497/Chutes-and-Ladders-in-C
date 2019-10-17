@@ -106,7 +106,7 @@ char * move(char *p1, char *p2, int playerNum, char board[], int size) {
     // If player lands on a space, a -, a *, or an H naturally, do not move player
     if (*p1 == ' ' || *p1 == 'H' || *p1 == '-' || *p1 == '*') {
         // Test for collisions
-        if (p1 == p2) {
+        if ((p1 - board) > 0 && p1 == p2) {
             p1 = p1 - 1;
             printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
         }
@@ -117,7 +117,7 @@ char * move(char *p1, char *p2, int playerNum, char board[], int size) {
         p1 = chuteLadder(p1, board);
         printf(" which is a chute and is moving back to square %d\n", p1 - board);
         // Test for collisions
-        if (p1 == p2) {
+        if ((p1 - board) > 0 && p1 == p2) {
             p1 = p1 - 1;
             printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
         }
@@ -127,7 +127,7 @@ char * move(char *p1, char *p2, int playerNum, char board[], int size) {
         p1 = chuteLadder(p1, board);
         printf(" which is a ladder and is moving forward to square %d\n", p1 - board);
         // Test for collisions
-        if (p1 == p2) {
+        if ((p1 - board) > 0 && p1 == p2) {
             p1 = p1 - 1;
             printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
         }
@@ -137,7 +137,7 @@ char * move(char *p1, char *p2, int playerNum, char board[], int size) {
         p1 = findHaven(p1, board);
         printf(" which is a 'F' so is moving forward and lands at %d\n", p1 - board);
         // Test for collisions
-        if (p1 == p2) {
+        if ((p1 - board) > 0 && p1 == p2) {
             p1 = p1 - 1;
             printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
         }
@@ -147,7 +147,7 @@ char * move(char *p1, char *p2, int playerNum, char board[], int size) {
         p1 = findHaven(p1, board);
         printf(" which is a 'B' so is moving back and lands at %d\n", p1 - board);
         // Test for collisions
-        if (p1 == p2) {
+        if ((p1 - board) > 0 && p1 == p2) {
             p1 = p1 - 1;
             printf(" -- Collision! %d is moving back 1 square to %d\n", playerNum, p1 - board);
         }
