@@ -8,15 +8,16 @@
  * Spencer Peace
  * CSC 362-001
  * Dr. Richard Fox
- * 10/15/19
+ * 10/17/19
  * Project3
  */
 
 /* Function Prototypes
- *char * move(char *, char *, char[] *, int, int);
- *void output(char[], char *, char *, FILE *);
- *char findHaven(char);
  *
+ *void output(char[], char *, char *, FILE *);
+ *char * findHaven(char, char *, char[]);
+ *char * chuteLadder();
+ *char * move(char *, char *, char[] *, int, int);
  *
 */
 
@@ -51,12 +52,47 @@ void output(char board[], char *p1, char *p2, FILE *fp1) {
 }
 
 // Define function to find the nearest haven, given the direction either forwards or backwards
-char findHaven(char direction) {
+char * findHaven(char direction, char *player, char board[]) {
+    char *haven; // Create pointer variable to locate the nearest haven
+    // if the player must search backwards for a haven
     if (direction == 'B') {
-
+        // Iterate down from the player's position to the board[0]
+        for (haven = player; haven >= board; haven--) {
+            // If there are no more havens backwards, return the starting position
+            if (haven == board) {
+                return board;
+            // Otherwise (if haven found), return this haven
+            } else if (*haven == 'H') {
+                // Reset haven to *
+                *haven = '*';
+                return haven;
+            }
+        }
+    // if the player must search forwards for a haven
     } else if (direction == 'F') {
-
+        // Iterate up from the players position to board + SIZE
+        for (haven = player; haven <= board + SIZE; haven++) {
+            // If there are no more havens forwards, do not move the player
+            if (haven == board + SIZE) {
+                return player;
+            // Otherwise, if haven found, return this haven
+            } else if (*haven == 'H') {
+                // reset haven to *
+                *haven = '*';
+                return haven;
+            }
+        }
     }
+}
+
+// Define chuteLadder function to move players if they land on a chute or a ladder
+char * chuteLadder() {
+
+}
+
+// Define move function to move players, return pointer
+char * move(char *p1, char *p2, int playerNum, char *board[], int size) {
+
 }
 
 // Main function, responsible for initializing players, board, and looping until a player wins, also outputs result
@@ -76,9 +112,7 @@ void main() {
 
     // Test
     //output(board, p1, p2, fp1);
-}
 
-// Define move function to move players, return pointer
-char * move(char *p1, char *p2, int playerNum, char *board[], int size) {
+    // Begin main game loop
 
 }
