@@ -4,12 +4,6 @@
  * ladder, they move forwards. When a chute, ladder, or haven is landed on, it is removed. Occasionally, a player will land on a space
  * that will direct them to the nearest haven, either backwards or forwards. Logic to handle collisions is included as
  * well.
- *
- * Spencer Peace
- * CSC 362-001
- * Dr. Richard Fox
- * 10/17/19
- * Project3
  */
 
 /* Function Prototypes
